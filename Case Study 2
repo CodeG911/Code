@@ -1,0 +1,55 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, Lasso
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import r2_score, mean_squared_error
+
+# Load dataset
+data = pd.read_csv("house_prices.csv")
+print("Dataset preview:\n", data.head())
+
+# Select features
+X = data[['Area', 'Bedrooms', 'Bathrooms', 'Age']]
+y = data['Price']
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=5)
+
+# Linear Regression
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+pred_lr = lr.predict(X_test)
+
+# Lasso Regression
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+pred_lasso = lasso.predict(X_test)
+
+# Polynomial Regression (degree = 2)
+poly_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+poly_model.fit(X_train, y_train)
+pred_poly = poly_model.predict(X_test)
+
+# Evaluation function
+def evaluate(model_name, y_true, y_pred):
+    print(f"\nModel: {model_name}")
+    print("R² Score:", round(r2_score(y_true, y_pred), 3))
+    print("RMSE:", round(mean_squared_error(y_true, y_pred, squared=False), 3))
+
+evaluate("Linear Regression", y_test, pred_lr)
+evaluate("Lasso Regression", y_test, pred_lasso)
+evaluate("Polynomial Regression", y_test, pred_poly)
+
+# Visualization
+plt.figure(figsize=(6,6))
+plt.scatter(y_test, pred_lr, label='Linear', alpha=0.6)
+plt.scatter(y_test, pred_lasso, label='Lasso', alpha=0.6)
+plt.scatter(y_test, pred_poly, label='Polynomial', alpha=0.6)
+plt.xlabel("Actual Prices")
+plt.ylabel("Predicted Prices")
+plt.title("Predicted vs Actual House Prices")
+plt.legend()
+plt.show()
