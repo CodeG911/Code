@@ -1,0 +1,41 @@
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import time
+
+# Load Dataset
+digits = datasets.load_digits()
+X = digits.data
+y = digits.target
+
+# Normalize data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Model 1: SVM
+start = time.time()
+svm_model = SVC(kernel='rbf', C=10, gamma=0.01)
+svm_model.fit(X_train, y_train)
+svm_pred = svm_model.predict(X_test)
+svm_time = round(time.time() - start, 2)
+
+# Model 2: Random Forest
+start = time.time()
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+rf_pred = rf_model.predict(X_test)
+rf_time = round(time.time() - start, 2)
+
+# Evaluation
+print("SVM Accuracy:", accuracy_score(y_test, svm_pred))
+print("Random Forest Accuracy:", accuracy_score(y_test, rf_pred))
+print("\nSVM Classification Report:\n", classification_report(y_test, svm_pred))
+print("\nRandom Forest Classification Report:\n", classification_report(y_test, rf_pred))
+print("\nSVM Time:", svm_time, "s")
+print("Random Forest Time:", rf_time, "s")
